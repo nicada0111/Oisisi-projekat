@@ -22,8 +22,15 @@ public class Posetilac : IEntitet, ISerializable
     
     public Adresa? Adresa { get; set; }
     public List<Knjiga> ListaZelja { get; set; } = new List<Knjiga>();
+    public List<Kupovina> Kupovine { get; set; } = new List<Kupovina>();
 
     public string ImePrezime => $"{Ime} {Prezime}";
+
+    
+    public double ProsecnaOcena => Kupovine.Count == 0 ? 0 : Kupovine.Average(k => k.Ocena);
+
+    
+    public decimal UkupnaPotrosnja => Kupovine.Sum(k => k.Knjiga?.Cena ?? 0);
 
     public string[] ToCSV()
     {

@@ -9,6 +9,7 @@ public class DataContext
     public AutorDAO Autori { get; }
     public KnjigaDAO Knjige { get; }
     public PosetilacDAO Posetioci { get; }
+    public KupovinaDAO Kupovine { get; }
 
     public DataContext()
     {
@@ -16,6 +17,7 @@ public class DataContext
         Autori = new AutorDAO();
         Knjige = new KnjigaDAO();
         Posetioci = new PosetilacDAO();
+        Kupovine = new KupovinaDAO();
 
         PoveziEntitete();
     }
@@ -26,6 +28,7 @@ public class DataContext
         PoveziAutore();
         PoveziKnjige();
         PoveziPosetioce();
+        PoveziKupovine();
     }
 
     private void PoveziAutore()
@@ -80,11 +83,38 @@ public class DataContext
     }
 
     
+    private void PoveziKupovine()
+    {
+        foreach (var posetilac in Posetioci.GetAll())
+        {
+            posetilac.Kupovine = new List<Kupovina>();
+        }
+        foreach (var knjiga in Knjige.GetAll())
+        {
+            knjiga.Kupci = new List<Posetilac>();
+        }
+
+        foreach (var kupovina in Kupovine.GetAll())
+        {
+            kupovina.Posetilac = Posetioci.GetById(kupovina.PosetilacId);
+            kupovina.Knjiga = Knjige.GetById(kupovina.KnjigaId);
+
+            kupovina.Posetilac?.Kupovine.Add(kupovina);
+            if (kupovina.Knjiga != null && kupovina.Posetilac != null
+                && !kupovina.Knjiga.Kupci.Contains(kupovina.Posetilac))
+            {
+                kupovina.Knjiga.Kupci.Add(kupovina.Posetilac);
+            }
+        }
+    }
+
+    
     public void SacuvajSve()
     {
         Adrese.Save();
         Autori.Save();
         Knjige.Save();
         Posetioci.Save();
+        Kupovine.Save();
     }
 }
