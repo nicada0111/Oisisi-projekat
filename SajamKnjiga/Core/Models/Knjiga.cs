@@ -4,6 +4,7 @@ using SajamKnjiga.Core.Utils;
 
 namespace SajamKnjiga.Core.Models;
 
+
 public class Knjiga : IEntitet, ISerializable
 {
     public int Id { get; set; }
@@ -16,7 +17,9 @@ public class Knjiga : IEntitet, ISerializable
     public List<int> AutoriIds { get; set; } = new List<int>();
     public int IzdavacId { get; set; }
 
+    
     public List<Autor> Autori { get; set; } = new List<Autor>();
+    public List<Posetilac> PosetiociListaZelja { get; set; } = new List<Posetilac>();
 
     public string[] ToCSV()
     {
