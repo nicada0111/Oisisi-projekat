@@ -1,0 +1,12 @@
+# Visual Studio 
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.userprefs
+*.cache
+*.log
+.idea/
+.vscode/
+TestResults/
