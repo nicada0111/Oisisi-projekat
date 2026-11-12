@@ -17,6 +17,7 @@ public class Autor : IEntitet, ISerializable
     public int GodineIskustva { get; set; }
 
     public Adresa? Adresa { get; set; }
+    public List<Knjiga> Knjige { get; set; } = new List<Knjiga>();
 
     public string ImePrezime => $"{Ime} {Prezime}";
 
