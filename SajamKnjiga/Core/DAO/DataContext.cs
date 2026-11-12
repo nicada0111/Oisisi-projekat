@@ -10,6 +10,7 @@ public class DataContext
     public KnjigaDAO Knjige { get; }
     public PosetilacDAO Posetioci { get; }
     public KupovinaDAO Kupovine { get; }
+    public IzdavacDAO Izdavaci { get; }
 
     public DataContext()
     {
@@ -18,6 +19,7 @@ public class DataContext
         Knjige = new KnjigaDAO();
         Posetioci = new PosetilacDAO();
         Kupovine = new KupovinaDAO();
+        Izdavaci = new IzdavacDAO();
 
         PoveziEntitete();
     }
@@ -29,6 +31,7 @@ public class DataContext
         PoveziKnjige();
         PoveziPosetioce();
         PoveziKupovine();
+        PoveziIzdavace();
     }
 
     private void PoveziAutore()
@@ -109,6 +112,22 @@ public class DataContext
     }
 
     
+    private void PoveziIzdavace()
+    {
+        foreach (var knjiga in Knjige.GetAll())
+        {
+            knjiga.Izdavac = Izdavaci.GetById(knjiga.IzdavacId);
+        }
+
+        foreach (var izdavac in Izdavaci.GetAll())
+        {
+            izdavac.Sef = Autori.GetById(izdavac.SefId);
+            izdavac.Knjige = Knjige.GetAll().Where(k => k.IzdavacId == izdavac.Id).ToList();
+            izdavac.Autori = izdavac.Knjige.SelectMany(k => k.Autori).Distinct().ToList();
+        }
+    }
+
+    
     public void SacuvajSve()
     {
         Adrese.Save();
@@ -116,5 +135,6 @@ public class DataContext
         Knjige.Save();
         Posetioci.Save();
         Kupovine.Save();
+        Izdavaci.Save();
     }
 }

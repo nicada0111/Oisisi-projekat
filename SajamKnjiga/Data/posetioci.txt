@@ -1,0 +1,5 @@
+1|Marko|Marković|10.02.1995|1|0601112223|marko.markovic@mail.com|SK-1-2019|5|V|4,6
+2|Milica|Nikolić|22.07.2000|2|0612223334|milica.nikolic@mail.com|SK-2-2021|3|R|1
+3|Petar|Stojanović|05.12.1988|3|0623334445|petar.stojanovic@mail.com|SK-3-2023|1|R|2,7
+4|Ivana|Marić|18.03.1992|4|0634445556|ivana.maric@mail.com|SK-4-2020|4|V|
+5|Luka|Popović|09.09.2003|5|0645556667|luka.popovic@mail.com|SK-5-2024|1|R|3,8

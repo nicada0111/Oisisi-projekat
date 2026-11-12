@@ -19,6 +19,7 @@ public class Knjiga : IEntitet, ISerializable
 
     
     public List<Autor> Autori { get; set; } = new List<Autor>();
+    public Izdavac? Izdavac { get; set; }
     public List<Posetilac> PosetiociListaZelja { get; set; } = new List<Posetilac>();
     public List<Posetilac> Kupci { get; set; } = new List<Posetilac>();
 

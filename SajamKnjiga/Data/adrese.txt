@@ -1,0 +1,10 @@
+1|Bulevar Jaše Tomića|90|Novi Sad|Srbija
+2|Knez Mihailova|1|Beograd|Srbija
+3|Zmaj Jovina|22|Novi Sad|Srbija
+4|Dimitrija Tucovića|12|Beograd|Srbija
+5|Kralja Milana|77|Niš|Srbija
+6|Svetozara Miletića|11|Beograd|Srbija
+7|Petra Vragolića|3|Ljubovija|Srbija
+8|Bulevar Evrope|26|Novi Sad|Srbija
+9|Stražilovska|1|Subotica|Srbija
+10|Cara Dušana|3|Čačak|Srbija
