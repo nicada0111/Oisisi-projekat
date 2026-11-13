@@ -2,7 +2,7 @@
 
 Projekat iz predmeta **Osnovi informacionih sistema i softverskog inženjerstva** (2025/2026).
 
-Desktop aplikacija za referenta sajma knjiga, pisana u jeziku C# (.NET 8).
+Desktop aplikacija za referenta sajma knjiga, pisana u jeziku C#.
 
 ## Struktura rešenja
 
