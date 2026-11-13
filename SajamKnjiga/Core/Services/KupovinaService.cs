@@ -41,6 +41,24 @@ public class KupovinaService
     }
 
     
+    public void Izmeni(Kupovina kupovina)
+    {
+        Kupovina? postojeca = _context.Kupovine.GetById(kupovina.Id);
+        if (postojeca == null)
+        {
+            throw new ValidacijaException($"Kupovina sa ID-jem {kupovina.Id} ne postoji.");
+        }
+        if (postojeca.PosetilacId != kupovina.PosetilacId || postojeca.KnjigaId != kupovina.KnjigaId)
+        {
+            throw new ValidacijaException("Posetilac i knjiga se ne mogu menjati kod postojeće kupovine.");
+        }
+
+        Validiraj(kupovina);
+        _context.Kupovine.Update(kupovina);
+        _context.PoveziEntitete();
+    }
+
+    
     private void Validiraj(Kupovina kupovina)
     {
         if (_context.Posetioci.GetById(kupovina.PosetilacId) == null)

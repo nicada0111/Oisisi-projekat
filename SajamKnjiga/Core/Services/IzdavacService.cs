@@ -4,7 +4,6 @@ using SajamKnjiga.Core.Utils;
 
 namespace SajamKnjiga.Core.Services;
 
-
 public class IzdavacService
 {
     private readonly DataContext _context;
@@ -24,14 +23,12 @@ public class IzdavacService
         return _context.Izdavaci.GetById(id);
     }
 
-    
     public bool JeSifraZauzeta(string sifra, int izuzmiId = 0)
     {
         Izdavac? postojeci = _context.Izdavaci.GetBySifra(sifra);
         return postojeci != null && postojeci.Id != izuzmiId;
     }
 
-    
 
     public Izdavac Dodaj(Izdavac izdavac)
     {
@@ -41,7 +38,17 @@ public class IzdavacService
         return izdavac;
     }
 
-    
+
+    public void Izmeni(Izdavac izdavac)
+    {
+        Validiraj(izdavac);
+        if (_context.Izdavaci.Update(izdavac) == null)
+        {
+            throw new ValidacijaException($"Izdavač sa ID-jem {izdavac.Id} ne postoji.");
+        }
+        _context.PoveziEntitete();
+    }
+
     private void Validiraj(Izdavac izdavac)
     {
         if (string.IsNullOrWhiteSpace(izdavac.Sifra) || string.IsNullOrWhiteSpace(izdavac.Naziv))

@@ -28,9 +28,10 @@ public class PosetilacController
             Console.WriteLine("1. Prikaz svih posetilaca");
             Console.WriteLine("2. Detaljan prikaz posetioca");
             Console.WriteLine("3. Dodavanje posetioca");
+            Console.WriteLine("4. Izmena posetioca");
             Console.WriteLine("0. Nazad");
 
-            int izbor = Unos.CeoBroj("Izaberite opciju", 0, 3);
+            int izbor = Unos.CeoBroj("Izaberite opciju", 0, 4);
             if (izbor == 0)
             {
                 return;
@@ -43,6 +44,7 @@ public class PosetilacController
                     case 1: PrikaziSve(); break;
                     case 2: PrikaziDetalje(); break;
                     case 3: Dodaj(); break;
+                    case 4: Izmeni(); break;
                 }
             }
             catch (ValidacijaException ex)
@@ -53,7 +55,6 @@ public class PosetilacController
         }
     }
 
-    
 
     public void PrikaziSve()
     {
@@ -104,7 +105,7 @@ public class PosetilacController
         TabelaIspis.IspisiListu("Lista želja", posetilac.ListaZelja.Select(k => k.ToString()).ToList());
     }
 
-    
+   
 
     private void Dodaj()
     {
@@ -164,6 +165,23 @@ public class PosetilacController
             }
             Unos.Greska($"Posetilac je već kupio knjige sa ID-jem: {string.Join(", ", vecKupljene)}");
         }
+    }
+
+    
+
+    private void Izmeni()
+    {
+        Posetilac? posetilac = Izaberi("izmenu");
+        if (posetilac == null)
+        {
+            return;
+        }
+
+        Unos.Naslov($"Izmena posetioca: {posetilac}");
+        Console.WriteLine("(Enter zadržava trenutnu vrednost prikazanu u zagradama)");
+        Posetilac izmenjen = UnesiPodatke(posetilac);
+        _posetilacService.Izmeni(izmenjen);
+        Unos.Uspeh("Izmene su sačuvane.");
     }
 
     

@@ -39,12 +39,24 @@ public class PosetilacService
     }
 
     
+
     public Posetilac Dodaj(Posetilac posetilac)
     {
         Validiraj(posetilac);
         _context.Posetioci.Add(posetilac);
         _context.PoveziEntitete();
         return posetilac;
+    }
+
+    
+    public void Izmeni(Posetilac posetilac)
+    {
+        Validiraj(posetilac);
+        if (_context.Posetioci.Update(posetilac) == null)
+        {
+            throw new ValidacijaException($"Posetilac sa ID-jem {posetilac.Id} ne postoji.");
+        }
+        _context.PoveziEntitete();
     }
 
     

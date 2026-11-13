@@ -28,9 +28,10 @@ public class KupovinaController
             Console.WriteLine("1. Prikaz svih kupovina");
             Console.WriteLine("2. Detaljan prikaz kupovine");
             Console.WriteLine("3. Dodavanje kupovine");
+            Console.WriteLine("4. Izmena kupovine");
             Console.WriteLine("0. Nazad");
 
-            int izbor = Unos.CeoBroj("Izaberite opciju", 0, 3);
+            int izbor = Unos.CeoBroj("Izaberite opciju", 0, 4);
             if (izbor == 0)
             {
                 return;
@@ -43,6 +44,7 @@ public class KupovinaController
                     case 1: PrikaziSve(); break;
                     case 2: PrikaziDetalje(); break;
                     case 3: Dodaj(); break;
+                    case 4: Izmeni(); break;
                 }
             }
             catch (ValidacijaException ex)
@@ -121,6 +123,33 @@ public class KupovinaController
 
         _kupovinaService.Dodaj(kupovina);
         Unos.Uspeh($"Kupovina je upisana (ID {kupovina.Id}).");
+    }
+
+    
+
+    private void Izmeni()
+    {
+        Kupovina? kupovina = Izaberi("izmenu");
+        if (kupovina == null)
+        {
+            return;
+        }
+
+        Unos.Naslov($"Izmena kupovine: {kupovina}");
+        Console.WriteLine("(Enter zadržava trenutnu vrednost prikazanu u zagradama)");
+        Kupovina izmenjena = new Kupovina
+        {
+            Id = kupovina.Id,
+            PosetilacId = kupovina.PosetilacId,
+            KnjigaId = kupovina.KnjigaId,
+            DatumKupovine = Unos.Datum("Datum kupovine", kupovina.DatumKupovine),
+            Ocena = Unos.CeoBroj("Ocena", Kupovina.MinOcena, Kupovina.MaxOcena, kupovina.Ocena)
+        };
+        string komentar = Unos.Tekst("Komentar ('-' briše komentar)", kupovina.Komentar, obavezno: false);
+        izmenjena.Komentar = komentar == "-" ? string.Empty : komentar;
+
+        _kupovinaService.Izmeni(izmenjena);
+        Unos.Uspeh("Izmene su sačuvane.");
     }
 
     
