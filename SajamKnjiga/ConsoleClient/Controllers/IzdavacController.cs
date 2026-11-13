@@ -26,9 +26,10 @@ public class IzdavacController
             Console.WriteLine("2. Detaljan prikaz izdavača");
             Console.WriteLine("3. Dodavanje izdavača");
             Console.WriteLine("4. Izmena izdavača");
+            Console.WriteLine("5. Brisanje izdavača");
             Console.WriteLine("0. Nazad");
 
-            int izbor = Unos.CeoBroj("Izaberite opciju", 0, 4);
+            int izbor = Unos.CeoBroj("Izaberite opciju", 0, 5);
             if (izbor == 0)
             {
                 return;
@@ -42,6 +43,7 @@ public class IzdavacController
                     case 2: PrikaziDetalje(); break;
                     case 3: Dodaj(); break;
                     case 4: Izmeni(); break;
+                    case 5: Obrisi(); break;
                 }
             }
             catch (ValidacijaException ex)
@@ -52,7 +54,7 @@ public class IzdavacController
         }
     }
 
-   
+    
 
     public void PrikaziSve()
     {
@@ -101,7 +103,7 @@ public class IzdavacController
         Unos.Uspeh($"Izdavač je dodat (ID {izdavac.Id}).");
     }
 
-   
+    
     private Izdavac UnesiPodatke(Izdavac? trenutni)
     {
         Izdavac izdavac = new Izdavac { Id = trenutni?.Id ?? 0 };
@@ -164,6 +166,33 @@ public class IzdavacController
         Izdavac izmenjen = UnesiPodatke(izdavac);
         _izdavacService.Izmeni(izmenjen);
         Unos.Uspeh("Izmene su sačuvane.");
+    }
+
+    
+
+    private void Obrisi()
+    {
+        Izdavac? izdavac = Izaberi("brisanje");
+        if (izdavac == null)
+        {
+            return;
+        }
+
+        List<string> posledice = _izdavacService.GetPosledicaBrisanja(izdavac.Id);
+        if (posledice.Count > 0)
+        {
+            Console.WriteLine("Pažnja:");
+            posledice.ForEach(p => Console.WriteLine($"  - {p}"));
+        }
+
+        if (!Unos.Potvrda($"Da li ste sigurni da želite da obrišete: {izdavac}?"))
+        {
+            Console.WriteLine("Brisanje je otkazano.");
+            return;
+        }
+
+        _izdavacService.Obrisi(izdavac.Id);
+        Unos.Uspeh("Obrisano.");
     }
 
     

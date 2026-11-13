@@ -25,7 +25,7 @@ public class PosetilacService
         return _context.Posetioci.GetById(id);
     }
 
-    
+
     public bool JeBrojClanskeKarteZauzet(string brojClanskeKarte, int izuzmiId = 0)
     {
         Posetilac? postojeci = _context.Posetioci.GetByBrojClanskeKarte(brojClanskeKarte);
@@ -38,7 +38,7 @@ public class PosetilacService
         return _context.Kupovine.GetByPosetilac(posetilacId).Select(k => k.KnjigaId).ToList();
     }
 
-    
+   
 
     public Posetilac Dodaj(Posetilac posetilac)
     {
@@ -48,7 +48,7 @@ public class PosetilacService
         return posetilac;
     }
 
-    
+   
     public void Izmeni(Posetilac posetilac)
     {
         Validiraj(posetilac);
@@ -56,6 +56,35 @@ public class PosetilacService
         {
             throw new ValidacijaException($"Posetilac sa ID-jem {posetilac.Id} ne postoji.");
         }
+        _context.PoveziEntitete();
+    }
+
+    
+    public List<string> GetPosledicaBrisanja(int id)
+    {
+        List<string> posledice = new List<string>();
+        int brojKupovina = _context.Kupovine.GetByPosetilac(id).Count;
+        if (brojKupovina > 0)
+        {
+            posledice.Add($"Biće obrisano kupovina ovog posetioca: {brojKupovina}");
+        }
+        return posledice;
+    }
+
+   
+    public void Obrisi(int id)
+    {
+        if (_context.Posetioci.GetById(id) == null)
+        {
+            throw new ValidacijaException($"Posetilac sa ID-jem {id} ne postoji.");
+        }
+
+        foreach (Kupovina kupovina in _context.Kupovine.GetByPosetilac(id))
+        {
+            _context.Kupovine.Delete(kupovina.Id);
+        }
+
+        _context.Posetioci.Delete(id);
         _context.PoveziEntitete();
     }
 

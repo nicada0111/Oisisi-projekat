@@ -29,9 +29,10 @@ public class KupovinaController
             Console.WriteLine("2. Detaljan prikaz kupovine");
             Console.WriteLine("3. Dodavanje kupovine");
             Console.WriteLine("4. Izmena kupovine");
+            Console.WriteLine("5. Brisanje kupovine");
             Console.WriteLine("0. Nazad");
 
-            int izbor = Unos.CeoBroj("Izaberite opciju", 0, 4);
+            int izbor = Unos.CeoBroj("Izaberite opciju", 0, 5);
             if (izbor == 0)
             {
                 return;
@@ -45,6 +46,7 @@ public class KupovinaController
                     case 2: PrikaziDetalje(); break;
                     case 3: Dodaj(); break;
                     case 4: Izmeni(); break;
+                    case 5: Obrisi(); break;
                 }
             }
             catch (ValidacijaException ex)
@@ -150,6 +152,33 @@ public class KupovinaController
 
         _kupovinaService.Izmeni(izmenjena);
         Unos.Uspeh("Izmene su sačuvane.");
+    }
+
+    
+
+    private void Obrisi()
+    {
+        Kupovina? kupovina = Izaberi("brisanje");
+        if (kupovina == null)
+        {
+            return;
+        }
+
+        List<string> posledice = _kupovinaService.GetPosledicaBrisanja(kupovina.Id);
+        if (posledice.Count > 0)
+        {
+            Console.WriteLine("Pažnja:");
+            posledice.ForEach(p => Console.WriteLine($"  - {p}"));
+        }
+
+        if (!Unos.Potvrda($"Da li ste sigurni da želite da obrišete: {kupovina}?"))
+        {
+            Console.WriteLine("Brisanje je otkazano.");
+            return;
+        }
+
+        _kupovinaService.Obrisi(kupovina.Id);
+        Unos.Uspeh("Obrisano.");
     }
 
     

@@ -59,6 +59,23 @@ public class KupovinaService
     }
 
     
+
+    public List<string> GetPosledicaBrisanja(int id)
+    {
+        
+        return new List<string>();
+    }
+
+    public void Obrisi(int id)
+    {
+        if (!_context.Kupovine.Delete(id))
+        {
+            throw new ValidacijaException($"Kupovina sa ID-jem {id} ne postoji.");
+        }
+        _context.PoveziEntitete();
+    }
+
+    
     private void Validiraj(Kupovina kupovina)
     {
         if (_context.Posetioci.GetById(kupovina.PosetilacId) == null)

@@ -5,7 +5,6 @@ using SajamKnjiga.Core.Utils;
 
 namespace SajamKnjiga.ConsoleClient.Controllers;
 
-
 public class PosetilacController
 {
     private readonly PosetilacService _posetilacService;
@@ -29,9 +28,10 @@ public class PosetilacController
             Console.WriteLine("2. Detaljan prikaz posetioca");
             Console.WriteLine("3. Dodavanje posetioca");
             Console.WriteLine("4. Izmena posetioca");
+            Console.WriteLine("5. Brisanje posetioca");
             Console.WriteLine("0. Nazad");
 
-            int izbor = Unos.CeoBroj("Izaberite opciju", 0, 4);
+            int izbor = Unos.CeoBroj("Izaberite opciju", 0, 5);
             if (izbor == 0)
             {
                 return;
@@ -45,6 +45,7 @@ public class PosetilacController
                     case 2: PrikaziDetalje(); break;
                     case 3: Dodaj(); break;
                     case 4: Izmeni(); break;
+                    case 5: Obrisi(); break;
                 }
             }
             catch (ValidacijaException ex)
@@ -55,6 +56,7 @@ public class PosetilacController
         }
     }
 
+    
 
     public void PrikaziSve()
     {
@@ -105,7 +107,7 @@ public class PosetilacController
         TabelaIspis.IspisiListu("Lista želja", posetilac.ListaZelja.Select(k => k.ToString()).ToList());
     }
 
-   
+    
 
     private void Dodaj()
     {
@@ -185,6 +187,32 @@ public class PosetilacController
     }
 
     
+
+    private void Obrisi()
+    {
+        Posetilac? posetilac = Izaberi("brisanje");
+        if (posetilac == null)
+        {
+            return;
+        }
+
+        List<string> posledice = _posetilacService.GetPosledicaBrisanja(posetilac.Id);
+        if (posledice.Count > 0)
+        {
+            Console.WriteLine("Pažnja:");
+            posledice.ForEach(p => Console.WriteLine($"  - {p}"));
+        }
+
+        if (!Unos.Potvrda($"Da li ste sigurni da želite da obrišete: {posetilac}?"))
+        {
+            Console.WriteLine("Brisanje je otkazano.");
+            return;
+        }
+
+        _posetilacService.Obrisi(posetilac.Id);
+        Unos.Uspeh("Obrisano.");
+    }
+
 
     private static string OpisStatusa(StatusPosetioca status)
     {
