@@ -23,9 +23,10 @@ public class AdresaController
             Console.WriteLine("2. Detaljan prikaz adrese");
             Console.WriteLine("3. Dodavanje adrese");
             Console.WriteLine("4. Izmena adrese");
+            Console.WriteLine("5. Brisanje adrese");
             Console.WriteLine("0. Nazad");
 
-            int izbor = Unos.CeoBroj("Izaberite opciju", 0, 4);
+            int izbor = Unos.CeoBroj("Izaberite opciju", 0, 5);
             if (izbor == 0)
             {
                 return;
@@ -39,6 +40,7 @@ public class AdresaController
                     case 2: PrikaziDetalje(); break;
                     case 3: Dodaj(); break;
                     case 4: Izmeni(); break;
+                    case 5: Obrisi(); break;
                 }
             }
             catch (ValidacijaException ex)
@@ -77,8 +79,6 @@ public class AdresaController
         });
         TabelaIspis.IspisiListu("Na ovoj adresi žive", _adresaService.GetStanari(adresa.Id));
     }
-
-
     private void Dodaj()
     {
         Unos.Naslov("Dodavanje adrese");
@@ -86,7 +86,6 @@ public class AdresaController
         _adresaService.Dodaj(adresa);
         Unos.Uspeh($"Adresa je dodata (ID {adresa.Id}).");
     }
-
     public int UnesiAdresu(int? trenutnaAdresaId = null)
     {
         if (trenutnaAdresaId.HasValue)
@@ -135,7 +134,6 @@ public class AdresaController
             Drzava = Unos.Tekst("  Država", trenutna?.Drzava)
         };
     }
-
     private void Izmeni()
     {
         Adresa? adresa = Izaberi("izmenu");
@@ -154,6 +152,23 @@ public class AdresaController
         Adresa izmenjena = UnesiPodatke(adresa);
         _adresaService.Izmeni(izmenjena);
         Unos.Uspeh("Izmene su sačuvane.");
+    }
+    private void Obrisi()
+    {
+        Adresa? adresa = Izaberi("brisanje");
+        if (adresa == null)
+        {
+            return;
+        }
+
+        if (!Unos.Potvrda($"Da li ste sigurni da želite da obrišete: {adresa}?"))
+        {
+            Console.WriteLine("Brisanje je otkazano.");
+            return;
+        }
+
+        _adresaService.Obrisi(adresa.Id);
+        Unos.Uspeh("Obrisano.");
     }
 
     private Adresa? Izaberi(string akcija)

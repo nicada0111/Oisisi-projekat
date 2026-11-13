@@ -35,7 +35,6 @@ public class AdresaService
         return stanari;
     }
 
-
     public Adresa Dodaj(Adresa adresa)
     {
         Validiraj(adresa);
@@ -50,6 +49,20 @@ public class AdresaService
         if (_context.Adrese.Update(adresa) == null)
         {
             throw new ValidacijaException($"Adresa sa ID-jem {adresa.Id} ne postoji.");
+        }
+        _context.PoveziEntitete();
+    }
+    public void Obrisi(int id)
+    {
+        List<string> stanari = GetStanari(id);
+        if (stanari.Count > 0)
+        {
+            throw new ValidacijaException(
+                "Adresa se ne može obrisati jer je koriste: " + string.Join("; ", stanari));
+        }
+        if (!_context.Adrese.Delete(id))
+        {
+            throw new ValidacijaException($"Adresa sa ID-jem {id} ne postoji.");
         }
         _context.PoveziEntitete();
     }

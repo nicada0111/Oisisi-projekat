@@ -29,6 +29,7 @@ public class AutorService
         Autor? postojeci = _context.Autori.GetByBrojLicneKarte(brojLicneKarte);
         return postojeci != null && postojeci.Id != izuzmiId;
     }
+
     public Autor Dodaj(Autor autor)
     {
         Validiraj(autor);
@@ -46,6 +47,54 @@ public class AutorService
         }
         _context.PoveziEntitete();
     }
+
+    public List<string> GetPosledicaBrisanja(int id)
+    {
+        List<string> posledice = new List<string>();
+        foreach (Knjiga knjiga in _context.Knjige.GetAll().Where(k => k.AutoriIds.Contains(id)))
+        {
+            string napomena = knjiga.AutoriIds.Count == 1 ? " (knjiga će ostati bez autora)" : "";
+            posledice.Add($"Autor će biti uklonjen sa knjige \"{knjiga.Naziv}\"{napomena}");
+        }
+        foreach (Izdavac izdavac in _context.Izdavaci.GetAll().Where(i => i.SefId == id))
+        {
+            posledice.Add($"Izdavač \"{izdavac.Naziv}\" će ostati bez šefa");
+        }
+        return posledice;
+    }
+
+    public void Obrisi(int id)
+    {
+        if (_context.Autori.GetById(id) == null)
+        {
+            throw new ValidacijaException($"Autor sa ID-jem {id} ne postoji.");
+        }
+
+        bool izmenjeneKnjige = false;
+        foreach (Knjiga knjiga in _context.Knjige.GetAll())
+        {
+            izmenjeneKnjige |= knjiga.AutoriIds.Remove(id);
+        }
+        if (izmenjeneKnjige)
+        {
+            _context.Knjige.Save();
+        }
+
+        bool izmenjeniIzdavaci = false;
+        foreach (Izdavac izdavac in _context.Izdavaci.GetAll().Where(i => i.SefId == id))
+        {
+            izdavac.SefId = 0;
+            izmenjeniIzdavaci = true;
+        }
+        if (izmenjeniIzdavaci)
+        {
+            _context.Izdavaci.Save();
+        }
+
+        _context.Autori.Delete(id);
+        _context.PoveziEntitete();
+    }
+
     private void Validiraj(Autor autor)
     {
         if (string.IsNullOrWhiteSpace(autor.Ime) || string.IsNullOrWhiteSpace(autor.Prezime))

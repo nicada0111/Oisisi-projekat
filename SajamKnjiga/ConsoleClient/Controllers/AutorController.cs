@@ -25,9 +25,10 @@ public class AutorController
             Console.WriteLine("2. Detaljan prikaz autora");
             Console.WriteLine("3. Dodavanje autora");
             Console.WriteLine("4. Izmena autora");
+            Console.WriteLine("5. Brisanje autora");
             Console.WriteLine("0. Nazad");
 
-            int izbor = Unos.CeoBroj("Izaberite opciju", 0, 4);
+            int izbor = Unos.CeoBroj("Izaberite opciju", 0, 5);
             if (izbor == 0)
             {
                 return;
@@ -41,6 +42,7 @@ public class AutorController
                     case 2: PrikaziDetalje(); break;
                     case 3: Dodaj(); break;
                     case 4: Izmeni(); break;
+                    case 5: Obrisi(); break;
                 }
             }
             catch (ValidacijaException ex)
@@ -150,8 +152,6 @@ public class AutorController
             return ids;
         }
     }
-
-
     private void Izmeni()
     {
         Autor? autor = Izaberi("izmenu");
@@ -165,6 +165,30 @@ public class AutorController
         Autor izmenjen = UnesiPodatke(autor);
         _autorService.Izmeni(izmenjen);
         Unos.Uspeh("Izmene su sačuvane.");
+    }
+    private void Obrisi()
+    {
+        Autor? autor = Izaberi("brisanje");
+        if (autor == null)
+        {
+            return;
+        }
+
+        List<string> posledice = _autorService.GetPosledicaBrisanja(autor.Id);
+        if (posledice.Count > 0)
+        {
+            Console.WriteLine("Pažnja:");
+            posledice.ForEach(p => Console.WriteLine($"  - {p}"));
+        }
+
+        if (!Unos.Potvrda($"Da li ste sigurni da želite da obrišete: {autor}?"))
+        {
+            Console.WriteLine("Brisanje je otkazano.");
+            return;
+        }
+
+        _autorService.Obrisi(autor.Id);
+        Unos.Uspeh("Obrisano.");
     }
 
     public Autor? Izaberi(string akcija)

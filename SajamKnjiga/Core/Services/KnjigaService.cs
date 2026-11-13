@@ -32,7 +32,6 @@ public class KnjigaService
         return postojeca != null && postojeca.Id != izuzmiId;
     }
 
-
     public Knjiga Dodaj(Knjiga knjiga)
     {
         Validiraj(knjiga);
@@ -40,6 +39,7 @@ public class KnjigaService
         _context.PoveziEntitete();
         return knjiga;
     }
+
     public void Izmeni(Knjiga knjiga)
     {
         Validiraj(knjiga);
@@ -49,6 +49,48 @@ public class KnjigaService
         }
         _context.PoveziEntitete();
     }
+
+    public List<string> GetPosledicaBrisanja(int id)
+    {
+        List<string> posledice = new List<string>();
+        int brojKupovina = _context.Kupovine.GetByKnjiga(id).Count;
+        if (brojKupovina > 0)
+        {
+            posledice.Add($"Biće obrisano kupovina ove knjige: {brojKupovina}");
+        }
+        int brojListaZelja = _context.Posetioci.GetAll().Count(p => p.ListaZeljaIds.Contains(id));
+        if (brojListaZelja > 0)
+        {
+            posledice.Add($"Knjiga će biti uklonjena sa lista želja posetilaca: {brojListaZelja}");
+        }
+        return posledice;
+    }
+    public void Obrisi(int id)
+    {
+        if (_context.Knjige.GetById(id) == null)
+        {
+            throw new ValidacijaException($"Knjiga sa ID-jem {id} ne postoji.");
+        }
+
+        bool izmenjeniPosetioci = false;
+        foreach (Posetilac posetilac in _context.Posetioci.GetAll())
+        {
+            izmenjeniPosetioci |= posetilac.ListaZeljaIds.Remove(id);
+        }
+        if (izmenjeniPosetioci)
+        {
+            _context.Posetioci.Save();
+        }
+
+        foreach (Kupovina kupovina in _context.Kupovine.GetByKnjiga(id))
+        {
+            _context.Kupovine.Delete(kupovina.Id);
+        }
+
+        _context.Knjige.Delete(id);
+        _context.PoveziEntitete();
+    }
+
     private void Validiraj(Knjiga knjiga)
     {
         if (!Regex.IsMatch(knjiga.Isbn, Validacija.IsbnRegex))
