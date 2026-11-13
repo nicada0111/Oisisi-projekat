@@ -23,9 +23,10 @@ public class AutorController
             Unos.Naslov("AUTORI");
             Console.WriteLine("1. Prikaz svih autora");
             Console.WriteLine("2. Detaljan prikaz autora");
+            Console.WriteLine("3. Dodavanje autora");
             Console.WriteLine("0. Nazad");
 
-            int izbor = Unos.CeoBroj("Izaberite opciju", 0, 2);
+            int izbor = Unos.CeoBroj("Izaberite opciju", 0, 3);
             if (izbor == 0)
             {
                 return;
@@ -37,6 +38,7 @@ public class AutorController
                 {
                     case 1: PrikaziSve(); break;
                     case 2: PrikaziDetalje(); break;
+                    case 3: Dodaj(); break;
                 }
             }
             catch (ValidacijaException ex)
@@ -46,7 +48,6 @@ public class AutorController
             Unos.Pauza();
         }
     }
-
 
     public void PrikaziSve()
     {
@@ -91,7 +92,65 @@ public class AutorController
     }
 
 
-    private Autor? Izaberi(string akcija)
+    private void Dodaj()
+    {
+        Unos.Naslov("Dodavanje autora");
+        Autor autor = UnesiPodatke(null);
+        _autorService.Dodaj(autor);
+        Unos.Uspeh($"Autor je dodat (ID {autor.Id}).");
+    }
+
+    private Autor UnesiPodatke(Autor? trenutni)
+    {
+        Autor autor = new Autor
+        {
+            Id = trenutni?.Id ?? 0,
+            Ime = Unos.Tekst("Ime", trenutni?.Ime),
+            Prezime = Unos.Tekst("Prezime", trenutni?.Prezime),
+            DatumRodjenja = Unos.Datum("Datum rođenja", trenutni?.DatumRodjenja),
+            Telefon = Unos.TekstPoFormatu("Telefon", Validacija.TelefonRegex, Validacija.TelefonOpis, trenutni?.Telefon),
+            Email = Unos.TekstPoFormatu("E-mail", Validacija.EmailRegex, Validacija.EmailOpis, trenutni?.Email)
+        };
+
+        while (true)
+        {
+            autor.BrojLicneKarte = Unos.TekstPoFormatu("Broj lične karte", Validacija.BrojLicneKarteRegex,
+                Validacija.BrojLicneKarteOpis, trenutni?.BrojLicneKarte);
+            if (!_autorService.JeBrojLicneKarteZauzet(autor.BrojLicneKarte, autor.Id))
+            {
+                break;
+            }
+            Unos.Greska("Već postoji autor sa tim brojem lične karte.");
+        }
+
+        autor.GodineIskustva = Unos.CeoBroj("Godine iskustva", 0, 80, trenutni?.GodineIskustva);
+        autor.AdresaId = _adresaController.UnesiAdresu(trenutni?.AdresaId);
+        return autor;
+    }
+
+    public List<int> IzaberiAutore(List<int>? trenutni = null)
+    {
+        while (true)
+        {
+            PrikaziSve();
+            List<int> ids = Unos.ListaId("Autori", trenutni);
+            if (ids.Count == 0)
+            {
+                Unos.Greska("Morate izabrati bar jednog autora.");
+                continue;
+            }
+
+            List<int> nepostojeci = ids.Where(id => _autorService.GetById(id) == null).ToList();
+            if (nepostojeci.Count > 0)
+            {
+                Unos.Greska($"Ne postoje autori sa ID-jem: {string.Join(", ", nepostojeci)}");
+                continue;
+            }
+            return ids;
+        }
+    }
+
+    public Autor? Izaberi(string akcija)
     {
         PrikaziSve();
         int id = Unos.CeoBroj($"Unesite ID autora za {akcija} (0 za odustanak)", 0, int.MaxValue);

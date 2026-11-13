@@ -4,7 +4,6 @@ using SajamKnjiga.Core.Services;
 
 namespace SajamKnjiga.ConsoleClient.Controllers;
 
-
 public class ConsoleController
 {
     private readonly DataContext _context;
@@ -20,7 +19,6 @@ public class ConsoleController
     {
         _context = context;
 
-        
         AdresaService adresaService = new AdresaService(context);
         AutorService autorService = new AutorService(context);
         KnjigaService knjigaService = new KnjigaService(context);
@@ -28,13 +26,12 @@ public class ConsoleController
         KupovinaService kupovinaService = new KupovinaService(context);
         IzdavacService izdavacService = new IzdavacService(context);
 
-        
         _adresaController = new AdresaController(adresaService);
         _autorController = new AutorController(autorService, _adresaController);
-        _knjigaController = new KnjigaController(knjigaService);
+        _izdavacController = new IzdavacController(izdavacService, _autorController);
+        _knjigaController = new KnjigaController(knjigaService, izdavacService, _autorController);
         _posetilacController = new PosetilacController(posetilacService, _adresaController, _knjigaController);
         _kupovinaController = new KupovinaController(kupovinaService, _posetilacController, _knjigaController);
-        _izdavacController = new IzdavacController(izdavacService, _autorController);
     }
 
     public void Pokreni()

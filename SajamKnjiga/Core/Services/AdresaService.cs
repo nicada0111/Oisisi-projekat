@@ -1,5 +1,6 @@
 using SajamKnjiga.Core.DAO;
 using SajamKnjiga.Core.Models;
+using SajamKnjiga.Core.Utils;
 
 namespace SajamKnjiga.Core.Services;
 
@@ -32,5 +33,23 @@ public class AdresaService
             .Where(a => a.AdresaId == adresaId)
             .Select(a => $"Autor: {a}"));
         return stanari;
+    }
+
+
+    public Adresa Dodaj(Adresa adresa)
+    {
+        Validiraj(adresa);
+        _context.Adrese.Add(adresa);
+        _context.PoveziEntitete();
+        return adresa;
+    }
+
+    private static void Validiraj(Adresa adresa)
+    {
+        if (string.IsNullOrWhiteSpace(adresa.Ulica) || string.IsNullOrWhiteSpace(adresa.Broj)
+            || string.IsNullOrWhiteSpace(adresa.Grad) || string.IsNullOrWhiteSpace(adresa.Drzava))
+        {
+            throw new ValidacijaException("Sva polja adrese su obavezna.");
+        }
     }
 }

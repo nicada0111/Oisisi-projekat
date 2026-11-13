@@ -21,9 +21,10 @@ public class AdresaController
             Unos.Naslov("ADRESE");
             Console.WriteLine("1. Prikaz svih adresa");
             Console.WriteLine("2. Detaljan prikaz adrese");
+            Console.WriteLine("3. Dodavanje adrese");
             Console.WriteLine("0. Nazad");
 
-            int izbor = Unos.CeoBroj("Izaberite opciju", 0, 2);
+            int izbor = Unos.CeoBroj("Izaberite opciju", 0, 3);
             if (izbor == 0)
             {
                 return;
@@ -35,6 +36,7 @@ public class AdresaController
                 {
                     case 1: PrikaziSve(); break;
                     case 2: PrikaziDetalje(); break;
+                    case 3: Dodaj(); break;
                 }
             }
             catch (ValidacijaException ex)
@@ -73,6 +75,64 @@ public class AdresaController
         });
         TabelaIspis.IspisiListu("Na ovoj adresi žive", _adresaService.GetStanari(adresa.Id));
     }
+
+    private void Dodaj()
+    {
+        Unos.Naslov("Dodavanje adrese");
+        Adresa adresa = UnesiPodatke(null);
+        _adresaService.Dodaj(adresa);
+        Unos.Uspeh($"Adresa je dodata (ID {adresa.Id}).");
+    }
+
+    public int UnesiAdresu(int? trenutnaAdresaId = null)
+    {
+        if (trenutnaAdresaId.HasValue)
+        {
+            Adresa? trenutna = _adresaService.GetById(trenutnaAdresaId.Value);
+            Console.WriteLine($"Trenutna adresa: {trenutna?.ToString() ?? "-"}");
+            if (trenutna != null && !Unos.Potvrda("Da li želite da promenite adresu?"))
+            {
+                return trenutna.Id;
+            }
+        }
+
+        int nacin = _adresaService.GetAll().Count == 0
+            ? 2
+            : Unos.CeoBroj("Adresa: 1 - izaberi postojeću, 2 - unesi novu", 1, 2);
+
+        if (nacin == 1)
+        {
+            while (true)
+            {
+                PrikaziSve();
+                int id = Unos.CeoBroj("Unesite ID adrese", 1, int.MaxValue);
+                if (_adresaService.GetById(id) != null)
+                {
+                    return id;
+                }
+                Unos.Greska($"Adresa sa ID-jem {id} ne postoji.");
+            }
+        }
+
+        Console.WriteLine("Unos nove adrese:");
+        Adresa nova = UnesiPodatke(null);
+        _adresaService.Dodaj(nova);
+        Unos.Uspeh($"Nova adresa je dodata (ID {nova.Id}).");
+        return nova.Id;
+    }
+
+    private static Adresa UnesiPodatke(Adresa? trenutna)
+    {
+        return new Adresa
+        {
+            Id = trenutna?.Id ?? 0,
+            Ulica = Unos.Tekst("  Ulica", trenutna?.Ulica),
+            Broj = Unos.Tekst("  Broj", trenutna?.Broj),
+            Grad = Unos.Tekst("  Grad", trenutna?.Grad),
+            Drzava = Unos.Tekst("  Država", trenutna?.Drzava)
+        };
+    }
+
 
     private Adresa? Izaberi(string akcija)
     {
