@@ -40,7 +40,15 @@ public class KnjigaService
         _context.PoveziEntitete();
         return knjiga;
     }
-
+    public void Izmeni(Knjiga knjiga)
+    {
+        Validiraj(knjiga);
+        if (_context.Knjige.Update(knjiga) == null)
+        {
+            throw new ValidacijaException($"Knjiga sa ID-jem {knjiga.Id} ne postoji.");
+        }
+        _context.PoveziEntitete();
+    }
     private void Validiraj(Knjiga knjiga)
     {
         if (!Regex.IsMatch(knjiga.Isbn, Validacija.IsbnRegex))

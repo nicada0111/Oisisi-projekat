@@ -22,9 +22,10 @@ public class AdresaController
             Console.WriteLine("1. Prikaz svih adresa");
             Console.WriteLine("2. Detaljan prikaz adrese");
             Console.WriteLine("3. Dodavanje adrese");
+            Console.WriteLine("4. Izmena adrese");
             Console.WriteLine("0. Nazad");
 
-            int izbor = Unos.CeoBroj("Izaberite opciju", 0, 3);
+            int izbor = Unos.CeoBroj("Izaberite opciju", 0, 4);
             if (izbor == 0)
             {
                 return;
@@ -37,6 +38,7 @@ public class AdresaController
                     case 1: PrikaziSve(); break;
                     case 2: PrikaziDetalje(); break;
                     case 3: Dodaj(); break;
+                    case 4: Izmeni(); break;
                 }
             }
             catch (ValidacijaException ex)
@@ -75,6 +77,7 @@ public class AdresaController
         });
         TabelaIspis.IspisiListu("Na ovoj adresi žive", _adresaService.GetStanari(adresa.Id));
     }
+
 
     private void Dodaj()
     {
@@ -133,6 +136,25 @@ public class AdresaController
         };
     }
 
+    private void Izmeni()
+    {
+        Adresa? adresa = Izaberi("izmenu");
+        if (adresa == null)
+        {
+            return;
+        }
+
+        Unos.Naslov($"Izmena adrese: {adresa}");
+        int brojStanara = _adresaService.GetStanari(adresa.Id).Count;
+        if (brojStanara > 0)
+        {
+            Console.WriteLine($"Napomena: izmena važi za sve koji žive na ovoj adresi ({brojStanara}).");
+        }
+        Console.WriteLine("(Enter zadržava trenutnu vrednost prikazanu u zagradama)");
+        Adresa izmenjena = UnesiPodatke(adresa);
+        _adresaService.Izmeni(izmenjena);
+        Unos.Uspeh("Izmene su sačuvane.");
+    }
 
     private Adresa? Izaberi(string akcija)
     {

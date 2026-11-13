@@ -29,8 +29,6 @@ public class AutorService
         Autor? postojeci = _context.Autori.GetByBrojLicneKarte(brojLicneKarte);
         return postojeci != null && postojeci.Id != izuzmiId;
     }
-
-
     public Autor Dodaj(Autor autor)
     {
         Validiraj(autor);
@@ -39,6 +37,15 @@ public class AutorService
         return autor;
     }
 
+    public void Izmeni(Autor autor)
+    {
+        Validiraj(autor);
+        if (_context.Autori.Update(autor) == null)
+        {
+            throw new ValidacijaException($"Autor sa ID-jem {autor.Id} ne postoji.");
+        }
+        _context.PoveziEntitete();
+    }
     private void Validiraj(Autor autor)
     {
         if (string.IsNullOrWhiteSpace(autor.Ime) || string.IsNullOrWhiteSpace(autor.Prezime))

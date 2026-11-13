@@ -44,6 +44,16 @@ public class AdresaService
         return adresa;
     }
 
+    public void Izmeni(Adresa adresa)
+    {
+        Validiraj(adresa);
+        if (_context.Adrese.Update(adresa) == null)
+        {
+            throw new ValidacijaException($"Adresa sa ID-jem {adresa.Id} ne postoji.");
+        }
+        _context.PoveziEntitete();
+    }
+
     private static void Validiraj(Adresa adresa)
     {
         if (string.IsNullOrWhiteSpace(adresa.Ulica) || string.IsNullOrWhiteSpace(adresa.Broj)

@@ -24,9 +24,10 @@ public class AutorController
             Console.WriteLine("1. Prikaz svih autora");
             Console.WriteLine("2. Detaljan prikaz autora");
             Console.WriteLine("3. Dodavanje autora");
+            Console.WriteLine("4. Izmena autora");
             Console.WriteLine("0. Nazad");
 
-            int izbor = Unos.CeoBroj("Izaberite opciju", 0, 3);
+            int izbor = Unos.CeoBroj("Izaberite opciju", 0, 4);
             if (izbor == 0)
             {
                 return;
@@ -39,6 +40,7 @@ public class AutorController
                     case 1: PrikaziSve(); break;
                     case 2: PrikaziDetalje(); break;
                     case 3: Dodaj(); break;
+                    case 4: Izmeni(); break;
                 }
             }
             catch (ValidacijaException ex)
@@ -90,7 +92,6 @@ public class AutorController
         });
         TabelaIspis.IspisiListu("Knjige", autor.Knjige.Select(k => k.ToString()).ToList());
     }
-
 
     private void Dodaj()
     {
@@ -148,6 +149,22 @@ public class AutorController
             }
             return ids;
         }
+    }
+
+
+    private void Izmeni()
+    {
+        Autor? autor = Izaberi("izmenu");
+        if (autor == null)
+        {
+            return;
+        }
+
+        Unos.Naslov($"Izmena autora: {autor.ImePrezime}");
+        Console.WriteLine("(Enter zadržava trenutnu vrednost prikazanu u zagradama)");
+        Autor izmenjen = UnesiPodatke(autor);
+        _autorService.Izmeni(izmenjen);
+        Unos.Uspeh("Izmene su sačuvane.");
     }
 
     public Autor? Izaberi(string akcija)

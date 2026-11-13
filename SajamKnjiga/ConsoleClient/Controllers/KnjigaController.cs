@@ -27,9 +27,10 @@ public class KnjigaController
             Console.WriteLine("1. Prikaz svih knjiga");
             Console.WriteLine("2. Detaljan prikaz knjige");
             Console.WriteLine("3. Dodavanje knjige");
+            Console.WriteLine("4. Izmena knjige");
             Console.WriteLine("0. Nazad");
 
-            int izbor = Unos.CeoBroj("Izaberite opciju", 0, 3);
+            int izbor = Unos.CeoBroj("Izaberite opciju", 0, 4);
             if (izbor == 0)
             {
                 return;
@@ -42,6 +43,7 @@ public class KnjigaController
                     case 1: PrikaziSve(); break;
                     case 2: PrikaziDetalje(); break;
                     case 3: Dodaj(); break;
+                    case 4: Izmeni(); break;
                 }
             }
             catch (ValidacijaException ex)
@@ -51,7 +53,6 @@ public class KnjigaController
             Unos.Pauza();
         }
     }
-
 
     public void PrikaziSve()
     {
@@ -97,7 +98,6 @@ public class KnjigaController
         TabelaIspis.IspisiListu("Na listi želja", knjiga.PosetiociListaZelja.Select(p => p.ToString()).ToList());
     }
 
-
     private void Dodaj()
     {
         Unos.Naslov("Dodavanje knjige");
@@ -105,7 +105,6 @@ public class KnjigaController
         _knjigaService.Dodaj(knjiga);
         Unos.Uspeh($"Knjiga je dodata (ID {knjiga.Id}).");
     }
-
     private Knjiga UnesiPodatke(Knjiga? trenutna)
     {
         Knjiga knjiga = new Knjiga { Id = trenutna?.Id ?? 0 };
@@ -132,7 +131,6 @@ public class KnjigaController
         knjiga.IzdavacId = IzaberiIzdavaca(trenutna?.IzdavacId);
         return knjiga;
     }
-
     private int IzaberiIzdavaca(int? trenutniId)
     {
         Console.WriteLine("Izdavači:");
@@ -151,7 +149,6 @@ public class KnjigaController
             Unos.Greska($"Izdavač sa ID-jem {id} ne postoji.");
         }
     }
-
     public List<int> IzaberiKnjige(string poruka, List<int>? trenutne = null)
     {
         while (true)
@@ -166,7 +163,20 @@ public class KnjigaController
             Unos.Greska($"Ne postoje knjige sa ID-jem: {string.Join(", ", nepostojece)}");
         }
     }
+    private void Izmeni()
+    {
+        Knjiga? knjiga = Izaberi("izmenu");
+        if (knjiga == null)
+        {
+            return;
+        }
 
+        Unos.Naslov($"Izmena knjige: {knjiga.Naziv}");
+        Console.WriteLine("(Enter zadržava trenutnu vrednost prikazanu u zagradama)");
+        Knjiga izmenjena = UnesiPodatke(knjiga);
+        _knjigaService.Izmeni(izmenjena);
+        Unos.Uspeh("Izmene su sačuvane.");
+    }
 
     public Knjiga? Izaberi(string akcija)
     {
