@@ -1,5 +1,6 @@
 using SajamKnjiga.Core.DAO;
 using SajamKnjiga.Core.Models;
+using SajamKnjiga.Core.Utils;
 
 namespace SajamKnjiga.Core.Services;
 
@@ -21,5 +22,49 @@ public class KupovinaService
     public Kupovina? GetById(int id)
     {
         return _context.Kupovine.GetById(id);
+    }
+
+    
+    public Kupovina Dodaj(Kupovina kupovina)
+    {
+        Validiraj(kupovina);
+        _context.Kupovine.Add(kupovina);
+
+        Posetilac posetilac = _context.Posetioci.GetById(kupovina.PosetilacId)!;
+        if (posetilac.ListaZeljaIds.Remove(kupovina.KnjigaId))
+        {
+            _context.Posetioci.Save();
+        }
+
+        _context.PoveziEntitete();
+        return kupovina;
+    }
+
+    
+    private void Validiraj(Kupovina kupovina)
+    {
+        if (_context.Posetioci.GetById(kupovina.PosetilacId) == null)
+        {
+            throw new ValidacijaException($"Posetilac sa ID-jem {kupovina.PosetilacId} ne postoji.");
+        }
+        if (_context.Knjige.GetById(kupovina.KnjigaId) == null)
+        {
+            throw new ValidacijaException($"Knjiga sa ID-jem {kupovina.KnjigaId} ne postoji.");
+        }
+        if (kupovina.Ocena < Kupovina.MinOcena || kupovina.Ocena > Kupovina.MaxOcena)
+        {
+            throw new ValidacijaException($"Ocena mora biti između {Kupovina.MinOcena} i {Kupovina.MaxOcena}.");
+        }
+        if (kupovina.DatumKupovine.Date > DateTime.Today)
+        {
+            throw new ValidacijaException("Datum kupovine ne sme biti u budućnosti.");
+        }
+
+        bool vecKupljena = _context.Kupovine.GetByPosetilac(kupovina.PosetilacId)
+            .Any(k => k.KnjigaId == kupovina.KnjigaId && k.Id != kupovina.Id);
+        if (vecKupljena)
+        {
+            throw new ValidacijaException("Ovaj posetilac je već kupio izabranu knjigu.");
+        }
     }
 }

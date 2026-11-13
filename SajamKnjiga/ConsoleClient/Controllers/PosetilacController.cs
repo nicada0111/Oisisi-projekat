@@ -27,9 +27,10 @@ public class PosetilacController
             Unos.Naslov("POSETIOCI");
             Console.WriteLine("1. Prikaz svih posetilaca");
             Console.WriteLine("2. Detaljan prikaz posetioca");
+            Console.WriteLine("3. Dodavanje posetioca");
             Console.WriteLine("0. Nazad");
 
-            int izbor = Unos.CeoBroj("Izaberite opciju", 0, 2);
+            int izbor = Unos.CeoBroj("Izaberite opciju", 0, 3);
             if (izbor == 0)
             {
                 return;
@@ -41,6 +42,7 @@ public class PosetilacController
                 {
                     case 1: PrikaziSve(); break;
                     case 2: PrikaziDetalje(); break;
+                    case 3: Dodaj(); break;
                 }
             }
             catch (ValidacijaException ex)
@@ -100,6 +102,68 @@ public class PosetilacController
             .Select(k => $"{k.Knjiga?.Naziv ?? "?"} ({Formati.DatumUString(k.DatumKupovine)}, ocena {k.Ocena})")
             .ToList());
         TabelaIspis.IspisiListu("Lista želja", posetilac.ListaZelja.Select(k => k.ToString()).ToList());
+    }
+
+    
+
+    private void Dodaj()
+    {
+        Unos.Naslov("Dodavanje posetioca");
+        Posetilac posetilac = UnesiPodatke(null);
+        _posetilacService.Dodaj(posetilac);
+        Unos.Uspeh($"Posetilac je dodat (ID {posetilac.Id}).");
+    }
+
+    
+    private Posetilac UnesiPodatke(Posetilac? trenutni)
+    {
+        Posetilac posetilac = new Posetilac
+        {
+            Id = trenutni?.Id ?? 0,
+            Ime = Unos.Tekst("Ime", trenutni?.Ime),
+            Prezime = Unos.Tekst("Prezime", trenutni?.Prezime),
+            DatumRodjenja = Unos.Datum("Datum rođenja", trenutni?.DatumRodjenja),
+            Telefon = Unos.TekstPoFormatu("Kontakt telefon", Validacija.TelefonRegex, Validacija.TelefonOpis, trenutni?.Telefon),
+            Email = Unos.TekstPoFormatu("E-mail", Validacija.EmailRegex, Validacija.EmailOpis, trenutni?.Email)
+        };
+
+        while (true)
+        {
+            posetilac.BrojClanskeKarte = Unos.TekstPoFormatu("Broj članske karte", Validacija.BrojClanskeKarteRegex,
+                Validacija.BrojClanskeKarteOpis, trenutni?.BrojClanskeKarte).ToUpper();
+            if (!_posetilacService.JeBrojClanskeKarteZauzet(posetilac.BrojClanskeKarte, posetilac.Id))
+            {
+                break;
+            }
+            Unos.Greska("Već postoji posetilac sa tim brojem članske karte.");
+        }
+
+        posetilac.TrenutnaGodinaClanstva = Unos.CeoBroj("Trenutna godina članstva", 1, 100,
+            trenutni?.TrenutnaGodinaClanstva);
+        string status = Unos.TekstPoFormatu("Status (R - redovan, V - VIP)", "^[RrVv]$", "R ili V",
+            trenutni?.Status.ToString());
+        posetilac.Status = Enum.Parse<StatusPosetioca>(status.ToUpper());
+
+        posetilac.AdresaId = _adresaController.UnesiAdresu(trenutni?.AdresaId);
+        posetilac.ListaZeljaIds = UnesiListuZelja(posetilac.Id, trenutni?.ListaZeljaIds);
+        return posetilac;
+    }
+
+    
+    private List<int> UnesiListuZelja(int posetilacId, List<int>? trenutna)
+    {
+        List<int> kupljene = _posetilacService.GetKupljeneKnjigeIds(posetilacId);
+        while (true)
+        {
+            Console.WriteLine("Lista želja (Enter - bez promene / prazna lista):");
+            List<int> ids = _knjigaController.IzaberiKnjige("Knjige na listi želja", trenutna);
+            List<int> vecKupljene = ids.Intersect(kupljene).ToList();
+            if (vecKupljene.Count == 0)
+            {
+                return ids;
+            }
+            Unos.Greska($"Posetilac je već kupio knjige sa ID-jem: {string.Join(", ", vecKupljene)}");
+        }
     }
 
     

@@ -27,9 +27,10 @@ public class KupovinaController
             Unos.Naslov("KUPOVINE");
             Console.WriteLine("1. Prikaz svih kupovina");
             Console.WriteLine("2. Detaljan prikaz kupovine");
+            Console.WriteLine("3. Dodavanje kupovine");
             Console.WriteLine("0. Nazad");
 
-            int izbor = Unos.CeoBroj("Izaberite opciju", 0, 2);
+            int izbor = Unos.CeoBroj("Izaberite opciju", 0, 3);
             if (izbor == 0)
             {
                 return;
@@ -41,6 +42,7 @@ public class KupovinaController
                 {
                     case 1: PrikaziSve(); break;
                     case 2: PrikaziDetalje(); break;
+                    case 3: Dodaj(); break;
                 }
             }
             catch (ValidacijaException ex)
@@ -51,7 +53,7 @@ public class KupovinaController
         }
     }
 
-     
+    
 
     public void PrikaziSve()
     {
@@ -89,6 +91,36 @@ public class KupovinaController
             ("Ocena", kupovina.Ocena.ToString()),
             ("Komentar", kupovina.Komentar.Length == 0 ? "-" : kupovina.Komentar)
         });
+    }
+
+    
+
+    private void Dodaj()
+    {
+        Unos.Naslov("Dodavanje kupovine");
+
+        Posetilac? posetilac = _posetilacController.Izaberi("kupovinu");
+        if (posetilac == null)
+        {
+            return;
+        }
+        Knjiga? knjiga = _knjigaController.Izaberi("kupovinu");
+        if (knjiga == null)
+        {
+            return;
+        }
+
+        Kupovina kupovina = new Kupovina
+        {
+            PosetilacId = posetilac.Id,
+            KnjigaId = knjiga.Id,
+            DatumKupovine = Unos.Datum("Datum kupovine"),
+            Ocena = Unos.CeoBroj("Ocena", Kupovina.MinOcena, Kupovina.MaxOcena),
+            Komentar = Unos.Tekst("Komentar (može ostati prazan)", obavezno: false)
+        };
+
+        _kupovinaService.Dodaj(kupovina);
+        Unos.Uspeh($"Kupovina je upisana (ID {kupovina.Id}).");
     }
 
     

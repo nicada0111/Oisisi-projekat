@@ -5,7 +5,6 @@ using SajamKnjiga.Core.Utils;
 
 namespace SajamKnjiga.ConsoleClient.Controllers;
 
-
 public class IzdavacController
 {
     private readonly IzdavacService _izdavacService;
@@ -24,9 +23,10 @@ public class IzdavacController
             Unos.Naslov("IZDAVAČI");
             Console.WriteLine("1. Prikaz svih izdavača");
             Console.WriteLine("2. Detaljan prikaz izdavača");
+            Console.WriteLine("3. Dodavanje izdavača");
             Console.WriteLine("0. Nazad");
 
-            int izbor = Unos.CeoBroj("Izaberite opciju", 0, 2);
+            int izbor = Unos.CeoBroj("Izaberite opciju", 0, 3);
             if (izbor == 0)
             {
                 return;
@@ -38,6 +38,7 @@ public class IzdavacController
                 {
                     case 1: PrikaziSve(); break;
                     case 2: PrikaziDetalje(); break;
+                    case 3: Dodaj(); break;
                 }
             }
             catch (ValidacijaException ex)
@@ -48,7 +49,7 @@ public class IzdavacController
         }
     }
 
-     
+    
 
     public void PrikaziSve()
     {
@@ -85,6 +86,64 @@ public class IzdavacController
         });
         TabelaIspis.IspisiListu("Autori", izdavac.Autori.Select(a => a.ToString()).ToList());
         TabelaIspis.IspisiListu("Knjige", izdavac.Knjige.Select(k => k.ToString()).ToList());
+    }
+
+   
+
+    private void Dodaj()
+    {
+        Unos.Naslov("Dodavanje izdavača");
+        Izdavac izdavac = UnesiPodatke(null);
+        _izdavacService.Dodaj(izdavac);
+        Unos.Uspeh($"Izdavač je dodat (ID {izdavac.Id}).");
+    }
+
+    
+    private Izdavac UnesiPodatke(Izdavac? trenutni)
+    {
+        Izdavac izdavac = new Izdavac { Id = trenutni?.Id ?? 0 };
+
+        while (true)
+        {
+            izdavac.Sifra = Unos.Tekst("Šifra", trenutni?.Sifra).ToUpper();
+            if (!_izdavacService.JeSifraZauzeta(izdavac.Sifra, izdavac.Id))
+            {
+                break;
+            }
+            Unos.Greska("Već postoji izdavač sa tom šifrom.");
+        }
+
+        izdavac.Naziv = Unos.Tekst("Naziv", trenutni?.Naziv);
+        izdavac.SefId = IzaberiSefa(trenutni);
+        return izdavac;
+    }
+
+    
+    private int IzaberiSefa(Izdavac? trenutni)
+    {
+        if (trenutni != null)
+        {
+            Console.WriteLine($"Trenutni šef: {trenutni.Sef?.ToString() ?? "-"}");
+            if (!Unos.Potvrda("Da li želite da promenite šefa izdavača?"))
+            {
+                return trenutni.SefId;
+            }
+        }
+
+        Console.WriteLine($"Izbor šefa (autor sa najmanje {Izdavac.MinGodinaIskustvaSefa} godina iskustva, 0 = bez šefa):");
+        while (true)
+        {
+            Autor? sef = _autorController.Izaberi("šefa izdavača");
+            if (sef == null)
+            {
+                return 0;
+            }
+            if (sef.GodineIskustva >= Izdavac.MinGodinaIskustvaSefa)
+            {
+                return sef.Id;
+            }
+            Unos.Greska($"{sef.ImePrezime} ima {sef.GodineIskustva} godina iskustva - potrebno je najmanje {Izdavac.MinGodinaIskustvaSefa}.");
+        }
     }
 
     

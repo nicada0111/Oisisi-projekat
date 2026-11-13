@@ -1,5 +1,6 @@
 namespace SajamKnjiga.Core.Utils;
 
+
 public static class Validacija
 {
     public const string EmailRegex = @"^[^@\s|]+@[^@\s|]+\.[^@\s|]+$";
@@ -13,4 +14,7 @@ public static class Validacija
 
     public const string BrojLicneKarteRegex = @"^\d{9}$";
     public const string BrojLicneKarteOpis = "tačno 9 cifara, npr. 001234567";
+
+    public const string BrojClanskeKarteRegex = @"^[A-Za-zА-Яа-яЂђЈјЉљЊњЋћЏџČčĆćŠšĐđŽž]{2}-\d+-\d{4}$";
+    public const string BrojClanskeKarteOpis = "npr. SK-1-2023";
 }
